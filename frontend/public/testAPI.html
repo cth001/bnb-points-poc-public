@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BNB Points Transaction Interface</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            grid-gap: 20px;
+            height: 100vh;
+        }
+
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .wallet-section {
+            border: 2px solid #333;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .explorer-section {
+            border: 2px solid #666;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-y: auto;
+        }
+        
+        .api-info {
+            border: 2px solid #999;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-column">
+        <div class="wallet-section">
+            <h2>BNB Points Wallet 积分钱包</h2>
+            <div class="form-group">
+                <label>Sender Address 发送方地址:</label>
+                <input type="text" id="sender" value="0xE548Ec21F1aE35cfB338690B7C6C5df807cAC9EC" readonly>
+            </div>
+            <div class="form-group">
+                <label>Private Key 发送方私钥:</label>
+                <input type="password" id="privateKey" value="0x985546d37ccd9a1fe0ab7931d34ce6b1497fc775593c5e5ccece79e097be6fe1" readonly>
+            </div>
+            <div class="form-group">
+                <label>Recipient Address 接收方地址:</label>
+                <input type="text" id="recipient" placeholder="Please input recipient address 请输入接收方地址">
+            </div>
+            <div class="form-group">
+                <label>Amount 发送数量:</label>
+                <input type="number" id="amount" value="10" readonly>
+            </div>
+            <button onclick="sendTransaction()">Send Tokens 发送代币</button>
+        </div>
+
+        <div class="explorer-section">
+            <h2 style="padding: 0 20px;">BNB Chain Explorer 区块浏览器</h2>
+            <div id="explorerInfo" style="padding: 20px;">
+                <p>Transaction Hash 交易哈希: <span id="txHash">Waiting for transaction... 等待交易...</span></p>
+                <p>Status 交易状态: <span id="txStatus">Not started 未开始</span></p>
+                <a id="explorerLink" href="#" target="_blank" style="display: none;">View Transaction Details 查看交易详情</a>
+            </div>
+        </div>
+    </div>
+    <div class="api-info" style="padding: 0 20px;">
+        <h2>API Information 接口信息</h2>
+        <p><strong>Endpoint 接口地址:</strong> http://localhost:3000/api/transfer</p>
+        <p><strong>Method 请求方式:</strong> POST</p>
+        <p><strong>Parameters 参数说明:</strong></p>
+        <ul>
+            <li>fromPrivateKey: Sender's private key 发送方私钥</li>
+            <li>toAddress: Recipient address 接收方地址</li>
+            <li>amount: Transfer amount 转账数量</li>
+        </ul>
+        <div id="apiResponse" style="margin-top: 20px; padding: 10px; background: #f5f5f5; border-radius: 5px;">
+            <strong>Transaction Result 交易结果:</strong> 
+            <pre id="responseData" style="white-space: pre-wrap;"></pre>
+        </div>
+    </div>
+
+    <script>
+        // 定义 API 基础 URL
+        // 将 API_BASE_URL 修改为 EC2 的地址
+        const API_BASE_URL = 'http://your-ec2-public-ip:3001/api';
+    
+        async function sendTransaction() {
+            const privateKey = document.getElementById('privateKey').value;
+            const recipient = document.getElementById('recipient').value;
+            const amount = document.getElementById('amount').value;
+    
+            if (!recipient) {
+                alert('请输入接收方地址');
+                return;
+            }
+    
+            try {
+                const response = await fetch(`${API_BASE_URL}/transfer`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        fromPrivateKey: privateKey,
+                        toAddress: recipient,
+                        amount: amount
+                    })
+                });
+    
+                const result = await response.json();
+                document.getElementById('responseData').textContent = JSON.stringify(result, null, 2);
+                
+                if (result.success) {
+                    const txHash = result.data.txHash;
+                    document.getElementById('txHash').textContent = txHash;
+                    document.getElementById('txStatus').textContent = '交易成功';
+                    const explorerLink = document.getElementById('explorerLink');
+                    explorerLink.href = `https://testnet.bscscan.com/tx/${txHash}`;
+                    explorerLink.style.display = 'block';
+                } else {
+                    alert('错误: ' + result.error);
+                    document.getElementById('txStatus').textContent = '交易失败';
+                }
+            } catch (error) {
+                alert('交易失败: ' + error.message);
+                document.getElementById('responseData').textContent = '交易失败: ' + error.message;
+                document.getElementById('txStatus').textContent = '交易失败';
+            }
+        }
+    
+        // 页面加载时查询发送方余额
+        async function checkBalance() {
+            const sender = document.getElementById('sender').value;
+            try {
+                const response = await fetch(`${API_BASE_URL}/balance/${sender}`);
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('responseData').textContent = 
+                        `Current Balance 当前余额: ${result.data.balance} BNBP`;
+                }
+            } catch (error) {
+                console.error('查询余额失败:', error);
+            }
+        }
+    
+        // 页面加载完成后执行
+        window.onload = checkBalance;
+    </script>
+</body>
+</html>

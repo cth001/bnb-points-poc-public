@@ -1,0 +1,36 @@
+Contract in BNB Solana ETH Bitcoin.
+Issuing, redeem, recall, burn, re-Issuing
+API test call
+Chain explorer
+Develop UI for API & Chain explorer
+
+Deploy to EC2 instance
+send dns
+
+
+
+BNB Address (Crypto.com)
+
+0x6F9d875458381CE47bbFD96Ee3881308259188b8
+
+
+
+SOL Address (Crypto.com)
+
+B8FpNVF8Pk4qR155ChC28TQsUysyToTra5xma9MC57Z2
+
+
+ETH Address (Kraken)
+
+0x3bdc820a4679ce467e928fe971285e2e60c81b3d
+
+
+
+BTC Address (Kraken)
+
+34svwQHq6NEZnf8w6cBsio4WKfPgBuNRSe
+
+
+{"success":true,"data":{"address":"0xD93737192Ff8504684Ac78aeBa0F60227839e35d","privateKey":"0x4005b69fc16822cbd53bc4408a510708e6b68436c78b9c1332fb5062b3fd26c1","balance":"100.0"}
+{"success":true,"data":{"address":"0xBE0d5a59073Ff65Ec81684952FDA62C7f17451AF","privateKey":"0xe3870bc6e6ba810907d077845f4667ef39fd39fa23a25ccd6f9e495c3987c405","balance":"100.0"}}}
+curl -X POST http://localhost:3000/api/test/transfer -H "Content-Type: application/json" -d "{\"fromAddress\":\"0xD93737192Ff8504684Ac78aeBa0F60227839e35d\",\"toAddress\":\"0xBE0d5a59073Ff65Ec81684952FDA62C7f17451AF\",\"amount\":\"10.0\"}"
