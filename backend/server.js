@@ -223,7 +223,7 @@ app.post('/api/transfer', async (req, res) => {
         });
     }
 });
-const PORT = process.env.PORT || 3000;  // 改用 3000 端口
+const PORT = process.env.PORT || 3001;  // 改用 3000 端口
 app.listen(PORT, () => {
   console.log(`服务器运行在端口 ${PORT}`);
 });

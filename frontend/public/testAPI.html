@@ -112,7 +112,7 @@
     </div>
     <div class="api-info" style="padding: 0 20px;">
         <h2>API Information 接口信息</h2>
-        <p><strong>Endpoint 接口地址:</strong> http://localhost:3000/api/transfer</p>
+        <p><strong>Endpoint 接口地址:</strong> http://localhost:3001/api/transfer</p>
         <p><strong>Method 请求方式:</strong> POST</p>
         <p><strong>Parameters 参数说明:</strong></p>
         <ul>
@@ -128,10 +128,10 @@
 
     <script>
         // 定义 API 基础 URL
-        // 将 API_BASE_URL 修改为 EC2 的地址
-        const API_BASE_URL = 'http://your-ec2-public-ip:3001/api';
+        const API_BASE_URL = 'http://localhost:3001/api';
     
         async function sendTransaction() {
+            document.getElementById('txStatus').textContent = 'Processing... 交易处理中...';
             const privateKey = document.getElementById('privateKey').value;
             const recipient = document.getElementById('recipient').value;
             const amount = document.getElementById('amount').value;
