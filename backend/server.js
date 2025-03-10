@@ -299,14 +299,29 @@ app.get('/api/bnb/balance/:address', async (req, res) => {
 // 添加 Solana 余额查询接口
 app.get('/api/solana/balance/:address', async (req, res) => {
   try {
+    // 创建钱包公钥
     const { address } = req.params;
-    const publicKey = new PublicKey(address);
-    const balance = await connection.getBalance(publicKey);
+    const walletPublicKey = new PublicKey(address);
+    // 创建一个管理员密钥对用于查询
+    const adminKeypair = Keypair.fromSecretKey(
+      Buffer.from('ROlcNRqKjhNJgwPtRpSXBZ2eB6UTf9fgSO00fxrOBj+A+TFNhgAjDB+aU23HbXyS8g8tj5elcaYP0oJFh0UJig==', 'base64')
+    );
+    const mintPublicKey = new PublicKey('EVpcyhP2wHNfgTzyWyqKuQf9SWR8XUYziB3SSq1sUsvp');
     
+    // 获取代币账户
+    const tokenAccount = await getOrCreateAssociatedTokenAccount(
+      connection,
+      adminKeypair,
+      mintPublicKey,
+      walletPublicKey
+    );
+    // 获取余额
+    const balance = await connection.getTokenAccountBalance(tokenAccount.address);
+    // console.log('查询余额成功:', balance.value.uiAmount);    
     res.json({
       success: true,
       data: {
-        balance: (balance / LAMPORTS_PER_SOL).toString()
+        balance: balance.value.uiAmount
       }
     });
   } catch (error) {
