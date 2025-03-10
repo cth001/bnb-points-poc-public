@@ -16,7 +16,12 @@ const SOLANA_NETWORK = 'devnet';
 const connection = new Connection(`https://api.${SOLANA_NETWORK}.solana.com`);
 
 // 中间件
-app.use(cors());
+// 修改 CORS 配置
+app.use(cors({
+  origin: '*',  // 允许所有来源访问
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+}));
 app.use(bodyParser.json());
 
 // BNB 转账接口 - 更新路径

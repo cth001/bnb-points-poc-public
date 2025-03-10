@@ -8,7 +8,7 @@ export default function TransferForm() {
     const handleSolanaTransfer = async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:3005/api/solana/transfer', {
+            const response = await fetch('http://3.86.177.144:3005/api/solana/transfer', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

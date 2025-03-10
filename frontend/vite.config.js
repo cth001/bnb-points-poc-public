@@ -5,7 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3001,
-    host: true, // 添加这行以允许局域网访问
-    open: true  // 添加这行以自动打开浏览器
+    host: '3.86.177.144',  // 修改为 EC2 IP
+    open: true
   }
 });

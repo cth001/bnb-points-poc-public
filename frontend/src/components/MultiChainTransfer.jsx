@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import {Box, Grid, Paper, Typography, TextField, Button, Snackbar, Alert} from '@mui/material';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3006/api'; // 更新端口号
+// const API_BASE_URL = 'http://localhost:3006/api'; // 更新端口号
+// 将本地地址改为 EC2 实例地址
+const API_BASE_URL = 'http://3.86.177.144:3006/api';
+// ... 其他代码保持不变 ...
 
 import TransactionHistory from './TransactionHistory';
 import ApiStatus from './ApiStatus';

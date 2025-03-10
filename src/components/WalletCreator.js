@@ -7,7 +7,7 @@ export default function WalletCreator() {
 
     const createWallet = async () => {
         try {
-            const response = await fetch('http://localhost:3005/api/solana/create-wallet', {
+            const response = await fetch('http://3.86.177.144:3005/api/solana/create-wallet', {
                 method: 'POST'
             });
             const result = await response.json();
