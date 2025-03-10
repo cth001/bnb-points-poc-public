@@ -10,7 +10,8 @@ import ApiStatus from './ApiStatus';
 const MultiChainTransfer = () => {
   // 添加状态管理
   const [transactions, setTransactions] = useState([]);
-  const [apiResponse, setApiResponse] = useState('等待交易...');
+  const [apiResponse, setApiResponse] = useState('Waiting for transaction...');
+  // const [apiResponse, setApiResponse] = useState('等待交易...');
   const [activeChain, setActiveChain] = useState('bnb');
   // const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('10');
@@ -38,8 +39,8 @@ const MultiChainTransfer = () => {
         }
       }
     } catch (error) {
-      console.error('刷新余额失败:', error);
-      showNotification(`刷新余额失败: ${error.message}`, 'error');
+      console.error('Refesh Balance error:', error);
+      showNotification(`Refesh Balance error: ${error.message}`, 'error');
     }
   };
   // 在交易成功后自动刷新余额
@@ -48,25 +49,29 @@ const MultiChainTransfer = () => {
     const currentRecipient = activeChain === 'bnb' ? bnbRecipient : solanaRecipient;
 
     if (!currentRecipient) {
-      showNotification('请输入接收方地址', 'error');
+      showNotification('Please enter recipient address', 'error');
+      // showNotification('请输入接收方地址', 'error');
       return;
     }
-  
-    setApiResponse('正在初始化交易...');
+
+    setApiResponse('Initializing transaction...');
+    // setApiResponse('正在初始化交易...');
   
     try {
-      setApiResponse('正在提交交易到区块链...');
+      setApiResponse('Submitting Transaction to the Blockchain...');
       let response;
       
       if (activeChain === 'bnb') {
-        setApiResponse('正在调用 BNB Chain API...');
+        setApiResponse('Calling BNB Chain API...');
+        // setApiResponse('正在调用 BNB Chain API...');
         response = await axios.post(`${API_BASE_URL}/transfer`, {
           fromPrivateKey: '0x985546d37ccd9a1fe0ab7931d34ce6b1497fc775593c5e5ccece79e097be6fe1',
           toAddress: currentRecipient,
           amount: Number(amount)
         });
       } else {
-        setApiResponse('正在调用 Solana API...');
+        setApiResponse('Calling Solana API...');
+        // setApiResponse('正在调用 Solana API...');
         response = await axios.post(`${API_BASE_URL}/solana/mint-token`, {
           tokenAddress: 'EVpcyhP2wHNfgTzyWyqKuQf9SWR8XUYziB3SSq1sUsvp',  // 固定的代币地址
           adminSecret: 'ROlcNRqKjhNJgwPtRpSXBZ2eB6UTf9fgSO00fxrOBj+A+TFNhgAjDB+aU23HbXyS8g8tj5elcaYP0oJFh0UJig==',  // 固定的管理员密钥
@@ -75,7 +80,7 @@ const MultiChainTransfer = () => {
         });
       }
   
-      console.log('API 响应:', response.data);
+      console.log('API Response:', response.data);
   
       if (response.data.success) {
         const txData = response.data.data;
@@ -83,8 +88,8 @@ const MultiChainTransfer = () => {
           chain: activeChain,
           status: 'success',
           message: activeChain === 'bnb' 
-            ? `成功转账 ${amount} BNB Points 到地址 ${currentRecipient}`
-            : `成功铸造 ${amount} SPT 代币到地址 ${currentRecipient}`,
+            ? `Successfully transfer ${amount} BNB Points to address ${currentRecipient}`
+            : `Successfully transfer ${amount} SPT Points to address ${currentRecipient}`,
           hash: activeChain === 'bnb' ? txData.txHash : txData.signature,
           explorer: activeChain === 'bnb' 
             ? `https://testnet.bscscan.com/tx/${txData.txHash}`
@@ -94,10 +99,10 @@ const MultiChainTransfer = () => {
         setApiResponse(JSON.stringify({
           status: 'success',
           chain: activeChain.toUpperCase(),
-          operation: activeChain === 'bnb' ? '转账' : '代币铸造',
+          operation: activeChain === 'bnb' ? 'Transfer' : 'Transfer',
           transactionHash: activeChain === 'bnb' ? txData.txHash : txData.signature,
           tokenAccount: txData.tokenAccount,
-          from: activeChain === 'bnb' ? txData.from : '代币合约',
+          from: activeChain === 'bnb' ? txData.from : 'Contract',
           to: currentRecipient,
           amount: `${amount} ${activeChain === 'bnb' ? 'BNB Points' : 'SPT'}`,
           explorer: activeChain === 'bnb'
@@ -118,18 +123,20 @@ const MultiChainTransfer = () => {
         }, null, 2));
         
         showNotification(
-          `${activeChain === 'bnb' ? 'BNB Points 转账' : 'Solana 代币铸造'}成功！`, 
+          `${activeChain === 'bnb' ? 'BNB Points Transfer' : 'Solana Token Mint'} Successful!`, 
           'success'
+          // `${activeChain === 'bnb' ? 'BNB Points 转账' : 'Solana 代币铸造'}成功！`, 
+          // 'success'
         );
       }
     } catch (error) {
-      console.error('交易错误:', error);
+      console.error('Transaction Error:', error);
       const errorMessage = error.response?.data?.error || error.message;
       
       addTransaction({
         chain: activeChain,
         status: 'error',
-        message: `交易失败: ${errorMessage}`
+        message: `Transaction faild: ${errorMessage}`
       });
       
       setApiResponse(JSON.stringify({
@@ -138,7 +145,7 @@ const MultiChainTransfer = () => {
         timestamp: new Date().toISOString()
       }, null, 2));
       
-      showNotification(`转账失败: ${errorMessage}`, 'error');
+      showNotification(`Transaction faild: ${errorMessage}`, 'error');
     }
     // 交易成功后刷新余额
     if (activeChain === 'bnb' && bnbWallet) {
@@ -162,7 +169,7 @@ const MultiChainTransfer = () => {
   // 创建钱包函数
   const createWallet = async (chain) => {
     try {
-      setApiResponse(`正在创建 ${chain.toUpperCase()} 钱包...`);
+      setApiResponse(`Creating ${chain.toUpperCase()} Wallet...`);
       const response = await axios.post(`${API_BASE_URL}/${chain}/create-wallet`);
       
       if (response.data.success) {
@@ -172,7 +179,7 @@ const MultiChainTransfer = () => {
         } else {
           setSolanaWallet(walletData);
         }
-        showNotification(`${chain.toUpperCase()} 钱包创建成功！`, 'success');
+        showNotification(`${chain.toUpperCase()} Create Wallet Success！`, 'success');
         setApiResponse(JSON.stringify({
           status: 'success',
           wallet: {
@@ -183,8 +190,8 @@ const MultiChainTransfer = () => {
         }, null, 2));
       }
     } catch (error) {
-      console.error(`${chain} 钱包创建失败:`, error);
-      showNotification(`钱包创建失败: ${error.message}`, 'error');
+      console.error(`${chain} Create Wallet faild:`, error);
+      showNotification(`Create Wallet faild: ${error.message}`, 'error');
       setApiResponse(JSON.stringify({
         status: 'error',
         error: error.message,
@@ -195,8 +202,8 @@ const MultiChainTransfer = () => {
   // 修改 BNB 钱包显示部分
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h6" sx={{ mb: 2, color: 'white' }}>
-        当前选择: {activeChain.toUpperCase()}
+      <Typography variant="h6" sx={{ mb: 2, color: '#1a1b25', fontWeight: 'bold' }}>
+        Current Chain Selection: {activeChain.toUpperCase()}
       </Typography>
       <Grid container spacing={3}>
       <Grid item xs={12} md={6}>
@@ -223,7 +230,7 @@ const MultiChainTransfer = () => {
                   width: '100%'  // 添加全宽按钮
                 }}
               >
-                创建 BNB 钱包
+                Create BNB Wallet
               </Button>
               {bnbWallet && (
                 <Box sx={{ 
@@ -234,13 +241,13 @@ const MultiChainTransfer = () => {
                   border: '1px solid rgba(243,186,47,0.3)'  // 添加边框
                 }}>
                   <Typography variant="body2" sx={{ color: '#F3BA2F', mb: 1 }}>
-                    钱包地址:
+                  Wallet Address:
                   </Typography>
                   <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
                     {bnbWallet.address}
                   </Typography>
                   <Typography variant="body2" sx={{ color: '#F3BA2F', mt: 1, mb: 1 }}>
-                    余额:
+                    Balance:
                   </Typography>
                   <Typography variant="body2">
                     {bnbWallet.balance} BNB Points
@@ -252,7 +259,7 @@ const MultiChainTransfer = () => {
             <Box>
               <TextField
                 fullWidth
-                label="接收方地址"
+                label="Recipient Address"
                 value={activeChain === 'bnb' ? bnbRecipient : ''}
                 onChange={(e) => activeChain === 'bnb' 
                   ? setBnbRecipient(e.target.value) 
@@ -278,7 +285,7 @@ const MultiChainTransfer = () => {
               />
               <TextField
                 fullWidth
-                label="转账金额"
+                label="Amount"
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
@@ -310,7 +317,7 @@ const MultiChainTransfer = () => {
                   '&:hover': { bgcolor: '#d4a41c' }
                 }}
               >
-                发送 BNB Points
+                Send BNB Points
               </Button>
             </Box>
           </Paper>
@@ -340,7 +347,7 @@ const MultiChainTransfer = () => {
                   width: '100%'
                 }}
               >
-                创建 Solana 钱包
+                Create Solana Wallet
               </Button>
               {solanaWallet && (
                 <Box sx={{ 
@@ -350,16 +357,16 @@ const MultiChainTransfer = () => {
                   wordBreak: 'break-all'
                 }}>
                   <Typography variant="body2" sx={{ color: '#a0a3c4', mb: 1 }}>
-                    钱包地址:
+                  Wallet Address:
                   </Typography>
                   <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
                     {solanaWallet.address}
                   </Typography>
                   <Typography variant="body2" sx={{ color: '#a0a3c4', mt: 1, mb: 1 }}>
-                    余额:
+                  Balance:
                   </Typography>
                   <Typography variant="body2">
-                    {solanaWallet.balance} SOL Points
+                    {solanaWallet.balance} SPT Points
                   </Typography>
                 </Box>
               )}
@@ -368,7 +375,7 @@ const MultiChainTransfer = () => {
             <Box>
               <TextField
                 fullWidth
-                label="接收方地址"
+                label="Recipient Address"
                 value={activeChain === 'bnb' ? '' : solanaRecipient}
                 onChange={(e) => activeChain === 'bnb' 
                   ? setSolanaRecipient('')
@@ -394,7 +401,7 @@ const MultiChainTransfer = () => {
               />
               <TextField
                 fullWidth
-                label="转账金额"
+                label="Amount"
                 type="number"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
@@ -425,7 +432,7 @@ const MultiChainTransfer = () => {
                   '&:hover': { bgcolor: '#7d38d1' }
                 }}
               >
-                发送 SOL 交易
+                Send SPT Transaction
               </Button>
             </Box>
           </Paper>

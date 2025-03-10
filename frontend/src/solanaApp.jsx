@@ -26,7 +26,9 @@ const App = () => {
       <CssBaseline />
       <Box sx={{ minHeight: '100vh', bgcolor: 'background.default', py: 4 }}>
         <Container maxWidth="xl">
-          <Typography variant="h3" sx={{ mb: 4 }}>多链交易平台</Typography>
+          <Typography variant="h3" sx={{ mb: 4, color: '#1a1b25', fontWeight: 'bold' }}>
+            Cross Chain Reward Points System
+          </Typography>
           <MultiChainTransfer />
         </Container>
       </Box>

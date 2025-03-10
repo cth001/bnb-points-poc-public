@@ -16,17 +16,17 @@ const ApiStatus = ({ response, lastUpdated }) => {
           wordBreak: 'break-all'
         }}
       >
-        {response || '等待交易...'}
+        {response || 'Waiting for API Call...'}
       </Box>
       <Box sx={{ color: '#a0a3c4' }}>
         <Typography variant="body2" sx={{ mb: 1 }}>
-          <strong>API 端点:</strong> http://localhost:3006
+          <strong>API Port:</strong> http://localhost:3006
         </Typography>
         <Typography variant="body2" sx={{ mb: 1 }}>
-          <strong>状态:</strong> 已连接
+          <strong>Status:</strong> Connected
         </Typography>
         <Typography variant="body2">
-          <strong>最后更新:</strong> {lastUpdated}
+          <strong>Last Update:</strong> {lastUpdated}
         </Typography>
       </Box>
     </Paper>
