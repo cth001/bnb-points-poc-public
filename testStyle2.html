@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Chain Transaction Portal</title>
+    <style>
+        :root {
+            --bnb-color: #F3BA2F;
+            --solana-color: #9945FF;
+            --status-bg: #ffffff;
+            --api-bg: #f8f9fa;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Inter', sans-serif;
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 20px;
+            height: 100vh;
+            background: #f0f2f5;
+        }
+
+        /* 交易面板通用样式 */
+        .transaction-panel {
+            background: #1a1b25;
+            border-radius: 16px;
+            padding: 25px;
+            color: white;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        /* BNB交易面板 */
+        #bnbPanel {
+            border: 2px solid var(--bnb-color);
+        }
+
+        /* Solana交易面板 */
+        #solanaPanel {
+            border: 2px solid var(--solana-color);
+        }
+
+        .chain-title {
+            font-size: 1.4em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chain-title::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .bnb-title::before {
+            background: var(--bnb-color);
+        }
+
+        .solana-title::before {
+            background: var(--solana-color);
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #a0a3c4;
+            font-size: 0.9em;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            font-family: monospace;
+        }
+
+        .send-button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .bnb-button {
+            background: var(--bnb-color);
+            color: #1a1b25;
+        }
+
+        .solana-button {
+            background: var(--solana-color);
+            color: white;
+        }
+
+        /* 状态面板 */
+        .status-panel {
+            background: var(--status-bg);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+
+        .tx-status {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .explorer-link {
+            color: #4a90e2;
+            text-decoration: none;
+            font-family: monospace;
+        }
+
+        /* API信息面板 */
+        .api-panel {
+            background: var(--api-bg);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+        }
+
+        .api-response {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <!-- 左上：BNB交易 -->
+    <div class="transaction-panel" id="bnbPanel">
+        <div class="chain-title bnb-title">BNB Chain Transaction</div>
+        <div class="form-group">
+            <label class="form-label">From Address</label>
+            <input type="text" class="form-input" 
+                   value="0x3F5...C4B" readonly>
+        </div>
+        <div class="form-group">
+            <label class="form-label">To Address</label>
+            <input type="text" class="form-input" 
+                   placeholder="Enter BNB address">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Amount</label>
+            <input type="number" class="form-input" value="100">
+        </div>
+        <button class="send-button bnb-button" onclick="sendTransaction('bnb')">
+            SEND BNB TRANSACTION
+        </button>
+    </div>
+
+    <!-- 左下：Solana交易 -->
+    <div class="transaction-panel" id="solanaPanel">
+        <div class="chain-title solana-title">Solana Transaction</div>
+        <div class="form-group">
+            <label class="form-label">From Wallet</label>
+            <input type="text" class="form-input" 
+                   value="So1A...b58" readonly>
+        </div>
+        <div class="form-group">
+            <label class="form-label">To Wallet</label>
+            <input type="text" class="form-input" 
+                   placeholder="Enter Solana address">
+        </div>
+        <div class="form-group">
+            <label class="form-label">Amount</label>
+            <input type="number" class="form-input" value="1">
+        </div>
+        <button class="send-button solana-button" onclick="sendTransaction('solana')">
+            SEND SOL TRANSACTION
+        </button>
+    </div>
+
+    <!-- 右上：交易状态 -->
+    <div class="status-panel">
+        <h2>Transaction Status</h2>
+        <div id="statusContainer">
+            <!-- 动态插入状态信息 -->
+        </div>
+    </div>
+
+    <!-- 右下：API状态 -->
+    <div class="api-panel">
+        <h2>API Response Status</h2>
+        <div class="api-response" id="apiResponse">
+            <!-- API响应信息 -->
+        </div>
+        <div class="api-info">
+            <p><strong>Last Updated:</strong> <span id="lastUpdated">-</span></p>
+            <p><strong>Success Rate:</strong> <span id="successRate">100%</span></p>
+        </div>
+    </div>
+
+    <script>
+        // 交易处理逻辑
+        async function sendTransaction(chain) {
+            const formData = getFormData(chain);
+            updateAPIStatus(`Sending ${chain.toUpperCase()} transaction...`);
+
+            try {
+                // 模拟API调用
+                const response = await mockApiCall(chain);
+                
+                // 更新交易状态
+                addStatusMessage({
+                    chain,
+                    status: 'success',
+                    message: `Transaction confirmed`,
+                    hash: response.txHash
+                });
+
+                // 更新API状态
+                updateAPIStatus(`Transaction successful | Hash: ${response.txHash}`);
+                
+            } catch (error) {
+                addStatusMessage({
+                    chain,
+                    status: 'error',
+                    message: error.message
+                });
+                updateAPIStatus(`Transaction failed: ${error.message}`);
+            }
+        }
+
+        function getFormData(chain) {
+            const panel = document.getElementById(`${chain}Panel`);
+            return {
+                from: panel.querySelector('input[readonly]').value,
+                to: panel.querySelector('input:not([readonly])').value,
+                amount: panel.querySelector('input[type="number"]').value
+            };
+        }
+
+        function addStatusMessage({chain, status, message, hash}) {
+            const statusBox = document.createElement('div');
+            statusBox.className = `tx-status ${status}`;
+            statusBox.innerHTML = `
+                <div style="margin-bottom: 8px;">
+                    <strong>${chain.toUpperCase()}</strong>
+                    <span style="color: ${status === 'success' ? '#4CAF50' : '#f44336'}">
+                        • ${status.toUpperCase()}
+                    </span>
+                </div>
+                <div>${message}</div>
+                ${hash ? `<a href="${getExplorerUrl(chain, hash)}" 
+                           class="explorer-link" target="_blank">
+                           View on Explorer
+                         </a>` : ''}
+            `;
+            document.getElementById('statusContainer').prepend(statusBox);
+        }
+
+        function updateAPIStatus(message) {
+            const responseBox = document.getElementById('apiResponse');
+            responseBox.textContent = message;
+            document.getElementById('lastUpdated').textContent = 
+                new Date().toLocaleString();
+        }
+
+        function getExplorerUrl(chain, hash) {
+            return {
+                bnb: `https://testnet.bscscan.com/tx/${hash}`,
+                solana: `https://explorer.solana.com/tx/${hash}?cluster=testnet`
+            }[chain];
+        }
+
+        // 模拟API响应
+        function mockApiCall(chain) {
+            return new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    Math.random() > 0.2 ? resolve({
+                        txHash: Math.random().toString(36).slice(2, 22),
+                        status: 'success'
+                    }) : reject(new Error('Transaction timeout'));
+                }, 1500);
+            });
+        }
+    </script>
+</body>
+</html>

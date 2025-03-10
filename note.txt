@@ -30,7 +30,54 @@ BTC Address (Kraken)
 
 34svwQHq6NEZnf8w6cBsio4WKfPgBuNRSe
 
+0xBE0d5a59073Ff65Ec81684952FDA62C7f17451AF
+
+
+{"success":true,"data":"5UfNbxZaC9RdHsAGF7qrBf5KAykGUvz9tcHaERvwAAcT"}
+
+0xE548Ec21F1aE35cfB338690B7C6C5df807cAC9EC
+0x7507f0772d066a3F8652F7Cb9B5EB01D558bcf9b
 
 {"success":true,"data":{"address":"0xD93737192Ff8504684Ac78aeBa0F60227839e35d","privateKey":"0x4005b69fc16822cbd53bc4408a510708e6b68436c78b9c1332fb5062b3fd26c1","balance":"100.0"}
 {"success":true,"data":{"address":"0xBE0d5a59073Ff65Ec81684952FDA62C7f17451AF","privateKey":"0xe3870bc6e6ba810907d077845f4667ef39fd39fa23a25ccd6f9e495c3987c405","balance":"100.0"}}}
 curl -X POST http://localhost:3000/api/test/transfer -H "Content-Type: application/json" -d "{\"fromAddress\":\"0xD93737192Ff8504684Ac78aeBa0F60227839e35d\",\"toAddress\":\"0xBE0d5a59073Ff65Ec81684952FDA62C7f17451AF\",\"amount\":\"10.0\"}"
+
+5JgVjdnPtdEyvQUvpVaVLH2ZRjvkR7PRzjVUQsbo8nBJ
+
+
+EVpcyhP2wHNfgTzyWyqKuQf9SWR8XUYziB3SSq1sUsvp //Solana token
+
+
+有两种方法解决端口占用问题：
+
+1. 找到并关闭占用端口的进程：
+```bash
+# 查找占用 3006 端口的进程
+netstat -ano | findstr :3006
+ ```
+
+这会显示类似这样的输出：
+
+```plaintext
+TCP    127.0.0.1:3006    0.0.0.0:0    LISTENING    1234
+ ```
+
+然后使用以下命令关闭该进程：
+
+```bash
+taskkill /PID 536712 /F
+ ```
+
+2. 或者，修改服务器使用的端口号。在 server.js 中：
+```javascript
+// 将端口改为 3007 或其他未被占用的端口
+const port = process.env.PORT || 3007;
+ ```
+
+如果选择方法 2，记得同时更新前端的 API_BASE_URL：
+
+```javascript
+const API_BASE_URL = 'http://localhost:3007/api';
+ ```
+
+curl -X POST http://localhost:3006/api/solana/mint-token -H "Content-Type: application/json" -d "{\"tokenAddress\":\"EVpcyhP2wHNfgTzyWyqKuQf9SWR8XUYziB3SSq1sUsvp\",\"adminSecret\":\"ROlcNRqKjhNJgwPtRpSXBZ2eB6UTf9fgSO00fxrOBj+A+TFNhgAjDB+aU23HbXyS8g8tj5elcaYP0oJFh0UJig==\",\"recipientAddress\":\"BBcSXeKhnJh6sZL32D29xnXpFD4q54c1Uv15nsG9faaa\",\"amount\":\"1000\"}"

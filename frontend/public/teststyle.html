@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Wallet Interface</title>
+    <style>
+        :root {
+            --wallet-bg: #1a1b25;
+            --api-bg: #f8f9fa;
+            --primary: #6c5ce7;
+            --success: #00b894;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            grid-gap: 25px;
+            height: 100vh;
+            background: #f0f2f5;
+        }
+
+        /* 钱包界面样式 */
+        .wallet-section {
+            background: var(--wallet-bg);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            color: white;
+        }
+
+        .wallet-section h2 {
+            margin: 0 0 25px 0;
+            font-size: 1.8em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .wallet-section h2::before {
+            content: '🪙';
+            font-size: 1.2em;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #a0a3c4;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .wallet-input {
+            width: 100%;
+            padding: 12px 15px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: white;
+            font-family: monospace;
+            transition: all 0.3s ease;
+        }
+
+        .wallet-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+        }
+
+        .send-button {
+            background: var(--success);
+            padding: 15px;
+            font-size: 1.1em;
+            margin-top: 10px;
+            transition: transform 0.2s, background 0.3s;
+        }
+
+        .send-button:hover {
+            background: #00a383;
+            transform: translateY(-1px);
+        }
+
+        /* API文档样式 */
+        .api-info {
+            background: var(--api-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .api-info h2 {
+            margin: 0 0 20px 0;
+            color: #2d3436;
+            font-size: 1.5em;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .api-endpoint {
+            background: #fff;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Fira Code', monospace;
+            border: 1px solid #e0e0e0;
+        }
+
+        .method-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-right: 10px;
+        }
+
+        .method-post {
+            background: #4a90e2;
+            color: white;
+        }
+
+        .param-list {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+        }
+
+        .param-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+
+        .param-name {
+            font-weight: 600;
+            min-width: 80px;
+            color: #2d3436;
+        }
+
+        /* 区块链浏览器样式 */
+        .explorer-section {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        #explorerFrame {
+            border-radius: 0 0 16px 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="left-column">
+        <!-- 修改后的钱包界面 -->
+        <style>
+            /* 添加网络切换按钮样式 */
+            .network-switch {
+                position: absolute;
+                top: 20px;
+                right: 20px;
+                background: rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 5px;
+                display: flex;
+                gap: 5px;
+            }
+
+            .network-option {
+                padding: 8px 16px;
+                border-radius: 15px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-size: 0.9em;
+            }
+
+            .network-option.active {
+                background: var(--primary);
+                color: white;
+            }
+        </style>
+
+        <!-- 在钱包界面添加切换按钮 -->
+        <div class="wallet-section">
+            <div class="network-switch">
+                <div class="network-option active" onclick="switchNetwork('bnb')">BNB</div>
+                <div class="network-option" onclick="switchNetwork('solana')">Solana</div>
+            </div>
+            <h2>Token Transfer</h2>
+            <div class="form-group">
+                <label>FROM ADDRESS</label>
+                <input type="text" id="sender" 
+                       class="wallet-input" 
+                       value="0x3F5...C4B" 
+                       readonly
+                       style="cursor: not-allowed;">
+            </div>
+            <div class="form-group">
+                <label>TO ADDRESS</label>
+                <input type="text" id="recipient" 
+                       class="wallet-input"
+                       placeholder="Enter recipient address">
+            </div>
+            <div class="form-group">
+                <label>AMOUNT</label>
+                <div style="position: relative;">
+                    <input type="number" id="amount" 
+                           class="wallet-input"
+                           value="100"
+                           readonly
+                           style="padding-left: 40px;">
+                    <span style="position: absolute;
+                                left: 15px;
+                                top: 50%;
+                                transform: translateY(-50%);
+                                color: #a0a3c4;">TOK</span>
+                </div>
+            </div>
+            <button class="send-button" onclick="sendTransaction()">
+                CONFIRM TRANSACTION
+            </button>
+        </div>
+
+        <!-- 增强的API文档样式 -->
+        <div class="api-info">
+            <h2>API Documentation</h2>
+            
+            <div class="api-endpoint">
+                <span class="method-tag method-post">POST</span>
+                <code>https://api.yourservice.com/v1/transactions</code>
+            </div>
+
+            <h3>Request Parameters</h3>
+            <ul class="param-list">
+                <li>
+                    <span class="param-name">from</span>
+                    <span>string (required)<br>
+                    <em>Sender's wallet address</em></span>
+                </li>
+                <li>
+                    <span class="param-name">to</span>
+                    <span>string (required)<br>
+                    <em>Recipient's wallet address</em></span>
+                </li>
+                <li>
+                    <span class="param-name">value</span>
+                    <span>integer (required)<br>
+                    <em>Transfer amount in tokens</em></span>
+                </li>
+            </ul>
+
+            <h3>Example Request</h3>
+            <pre class="api-endpoint" style="white-space: pre-wrap;">
+{
+  "from": "0x3F5...C4B",
+  "to": "0x892...D1A",
+  "value": 100
+}</pre>
+        </div>
+    </div>
+
+    <!-- 区块链浏览器部分保持不变 -->
+    <div class="explorer-section">
+        <h2 style="padding: 20px; margin: 0; color: #2d3436;">BNB Chain Explorer</h2>
+        <iframe id="explorerFrame" src="https://testnet.bscscan.com/"></iframe>
+    </div>
+
+    <script>
+        let currentNetwork = 'bnb';
+
+        function switchNetwork(network) {
+            currentNetwork = network;
+            // 更新UI
+            document.querySelectorAll('.network-option').forEach(opt => {
+                opt.classList.toggle('active', opt.innerText.toLowerCase() === network);
+            });
+
+            // 更新浏览器iframe的URL
+            const explorerFrame = document.getElementById('explorerFrame');
+            if (network === 'bnb') {
+                explorerFrame.src = 'https://testnet.bscscan.com/';
+                document.querySelector('.explorer-section h2').textContent = 'BNB Chain Explorer';
+            } else {
+                explorerFrame.src = 'https://explorer.solana.com/?cluster=devnet';
+                document.querySelector('.explorer-section h2').textContent = 'Solana Explorer';
+            }
+
+            // 更新API文档
+            updateApiDocs(network);
+        }
+
+        function updateApiDocs(network) {
+            const apiEndpoint = document.querySelector('.api-endpoint code');
+            if (network === 'bnb') {
+                apiEndpoint.textContent = 'http://localhost:3005/api/transfer';
+            } else {
+                apiEndpoint.textContent = 'http://localhost:3005/api/solana/transfer';
+            }
+
+            // 更新示例请求
+            const exampleRequest = document.querySelector('pre.api-endpoint');
+            if (network === 'bnb') {
+                exampleRequest.textContent = `{
+      "fromPrivateKey": "0x...",
+      "toAddress": "0x...",
+      "amount": 100
+    }`;
+            } else {
+                exampleRequest.textContent = `{
+      "fromSecret": "base64编码的私钥",
+      "toAddress": "Solana地址",
+      "amount": 100
+    }`;
+            }
+        }
+
+        function sendTransaction() {
+            const recipient = document.getElementById('recipient').value;
+            const amount = document.getElementById('amount').value;
+            
+            const endpoint = currentNetwork === 'bnb' 
+                ? 'http://localhost:3005/api/transfer'
+                : 'http://localhost:3005/api/solana/transfer';
+
+            // 这里添加实际的交易发送逻辑
+            console.log(`Sending ${amount} tokens to ${recipient} via ${currentNetwork}`);
+        }
+    </script>
+</body>
+</html>
